@@ -30,9 +30,9 @@ from models.schedule import Schedule
 
 def _job_colours(n_jobs: int):
     """Retourne une liste de couleurs distinctes pour chaque job."""
-    cmap = cm.get_cmap("tab20" if n_jobs <= 20 else "hsv", n_jobs)
-    return [cmap(i) for i in range(n_jobs)]
-
+     
+    cmap = plt.colormaps["tab20" if n_jobs <= 20 else "hsv"]
+    return [cmap(i / n_jobs) for i in range(n_jobs)]
 
 # ---------------------------------------------------------------------------
 # Fonction principale

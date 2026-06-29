@@ -49,7 +49,7 @@ HEURISTIC_MAP = {
 }
 
 # Instances LA disponibles
-ALL_INSTANCES = [f"la{i:02d}" for i in range(1, 21)]
+ALL_INSTANCES = [f"la{i:02d}" for i in range(1, 21)] + ["abs25"]
 
 
 # ---------------------------------------------------------------------------

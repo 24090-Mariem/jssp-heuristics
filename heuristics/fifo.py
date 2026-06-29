@@ -32,19 +32,20 @@ class FIFOHeuristic(BaseHeuristic):
         machines: List[Machine],
         current_time: int,
     ) -> Operation:
-        """Return the ready operation with the lowest (job_id, op_index).
+        """FIFO محسّن — يختار بناءً على وقت تحرر الـ Job الفعلي.
 
         Args:
             ready_operations: Eligible operations to choose from.
-            jobs: Unused — present for interface compatibility.
+            jobs: Used to compute job release time.
             machines: Unused — present for interface compatibility.
             current_time: Unused — present for interface compatibility.
 
         Returns:
-            Operation with the smallest ``job_id``; ties broken by
-            ``op_index``, then ``machine_id``.
+            Operation whose job became ready earliest; ties broken by
+            ``job_id``, then ``op_index``.
         """
-        return min(
-            ready_operations,
-            key=lambda op: (op.job_id, op.op_index, op.machine_id),
-        )
+        def fifo_key(op: Operation) -> tuple:
+            release_time = jobs[op.job_id].earliest_start()
+            return (release_time, op.job_id, op.op_index)
+
+        return min(ready_operations, key=fifo_key)

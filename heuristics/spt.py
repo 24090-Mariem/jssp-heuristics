@@ -33,22 +33,24 @@ class SPTHeuristic(BaseHeuristic):
         machines: List[Machine],
         current_time: int,
     ) -> Operation:
-        """Sélectionne l’opération ayant le plus petit temps de traitement.
+        """SPT محسّن — عند التعادل يختار الـ job الأقرب للانتهاء.
 
         Args:
-            ready_operations: Liste des opérations disponibles à l’instant courant.
-            jobs: Contexte global des jobs (non utilisé ici).
-            machines: Contexte global des machines (non utilisé ici).
-            current_time: Temps courant de simulation (non utilisé ici).
+            ready_operations: Eligible operations to choose from.
+            jobs: Used to compute remaining processing time per job.
+            machines: Unused — present for interface compatibility.
+            current_time: Unused — present for interface compatibility.
 
         Returns:
-            L’opération avec le plus petit ``processing_time``.
-
-        Note:
-            En cas d’égalité, la sélection est déterministe via
-            (job_id, op_index) afin d’éviter des résultats non reproductibles.
+            Operation with smallest ``processing_time``; ties broken by
+            remaining job time, then ``job_id``, then ``op_index``.
         """
-        return min(
-            ready_operations,
-            key=lambda op: (op.processing_time, op.job_id, op.op_index),
-        )
+        def spt_key(op: Operation) -> tuple:
+            remaining = sum(
+                o.processing_time
+                for o in jobs[op.job_id].operations
+                if not o.is_scheduled
+            )
+            return (op.processing_time, remaining, op.job_id, op.op_index)
+
+        return min(ready_operations, key=spt_key)

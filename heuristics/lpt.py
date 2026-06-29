@@ -32,22 +32,22 @@ class LPTHeuristic(BaseHeuristic):
         machines: List[Machine],
         current_time: int,
     ) -> Operation:
-        """Sélectionne l’opération ayant le temps de traitement le plus élevé.
+        """LPT محسّن — عند التعادل يختار الماكينة الأقل ازدحاماً.
 
         Args:
-            ready_operations: Opérations actuellement disponibles.
-            jobs: Contexte global des jobs (non utilisé ici).
-            machines: Contexte global des machines (non utilisé ici).
-            current_time: Temps courant de la simulation (non utilisé ici).
+            ready_operations: Eligible operations to choose from.
+            jobs: Unused — present for interface compatibility.
+            machines: Used to evaluate current machine load.
+            current_time: Unused — present for interface compatibility.
 
         Returns:
-            L’opération avec le plus grand ``processing_time``.
-
-        Note:
-            En cas d’égalité, on privilégie une règle déterministe basée sur
-            (job_id, op_index) pour éviter les comportements non reproductibles.
+            Operation with largest ``processing_time``; ties broken by
+            machine availability, then ``job_id``, then ``op_index``.
         """
-        return max(
-            ready_operations,
-            key=lambda op: (op.processing_time, -op.job_id, -op.op_index),
-        )
+        machine_map = {m.machine_id: m for m in machines}
+
+        def lpt_key(op: Operation) -> tuple:
+            machine_load = machine_map[op.machine_id].available_at
+            return (-op.processing_time, machine_load, op.job_id, op.op_index)
+
+        return min(ready_operations, key=lpt_key)

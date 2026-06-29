@@ -107,7 +107,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
+tab_sim, tab_bench, tab_ai = st.tabs(
+    ["🔬 Simulation unique", "📊 Benchmark complet", "🤖 AI Assistant"]
+)
 with st.sidebar:
     st.title("⚙️ JSSP Simulator")
     st.caption("Job Shop Scheduling Problem — Framework heuristique")
@@ -132,7 +134,8 @@ with st.sidebar:
 # ======================================================================
 # MODE 1 — Simulation unique
 # ======================================================================
-if mode == "🔬 Simulation unique":
+with tab_sim:
+ if mode == "🔬 Simulation unique":
     st.title("🔬 Simulation unique")
 
     col_left, col_right = st.columns([1, 2])
@@ -252,7 +255,7 @@ if mode == "🔬 Simulation unique":
 # ======================================================================
 # MODE 2 — Benchmark complet
 # ======================================================================
-else:
+ with tab_bench:
     st.title("Benchmark complet")
     st.caption("3 heuristiques × 20 instances = 60 simulations")
 
@@ -335,3 +338,5 @@ else:
             )
 
             plt.close("all")
+
+

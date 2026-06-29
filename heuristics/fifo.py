@@ -1,13 +1,8 @@
 """First In, First Out (FIFO) scheduling heuristic.
 
-Priority rule:
-    Select the ready operation belonging to the job that entered the
-    system first (smallest job_id).
-
-Tie-breaking:
-    1. job_id
-    2. operation index
-    3. machine_id
+Priority rule: schedule the operation whose job arrived first, i.e.,
+the operation with the smallest job_id.  Ties are broken by operation
+index within the job, then by machine_id.
 """
 
 from __future__ import annotations
@@ -21,11 +16,9 @@ from models.operation import Operation
 
 
 class FIFOHeuristic(BaseHeuristic):
-    """Classical First In, First Out (FIFO).
+    """First In, First Out — prefer operations belonging to lower-numbered jobs.
 
-    Jobs are served according to their arrival order.
-    In benchmark JSSP instances, where all jobs arrive at time 0,
-    the job_id represents the arrival order.
+    This is the simplest priority rule and serves as a baseline.
     """
 
     @property
@@ -39,23 +32,20 @@ class FIFOHeuristic(BaseHeuristic):
         machines: List[Machine],
         current_time: int,
     ) -> Operation:
-        """Select the first arrived job.
+        """FIFO محسّن — يختار بناءً على وقت تحرر الـ Job الفعلي.
 
         Args:
-            ready_operations: Operations eligible for scheduling.
-            jobs: Unused (kept for interface compatibility).
-            machines: Unused.
-            current_time: Unused.
+            ready_operations: Eligible operations to choose from.
+            jobs: Used to compute job release time.
+            machines: Unused — present for interface compatibility.
+            current_time: Unused — present for interface compatibility.
 
         Returns:
-            Selected operation according to FIFO.
+            Operation whose job became ready earliest; ties broken by
+            ``job_id``, then ``op_index``.
         """
+        def fifo_key(op: Operation) -> tuple:
+            release_time = jobs[op.job_id].earliest_start()
+            return (release_time, op.job_id, op.op_index)
 
-        return min(
-            ready_operations,
-            key=lambda op: (
-                op.job_id,
-                op.op_index,
-                op.machine_id,
-            ),
-        )
+        return min(ready_operations, key=fifo_key)
